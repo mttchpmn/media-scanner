@@ -1,6 +1,6 @@
 {
   "name": "media-scanner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Scan a directory of media files and write the output to a .csv",
   "main": "index.ts",
   "bin": {
