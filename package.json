@@ -1,0 +1,22 @@
+{
+  "name": "media-scanner",
+  "version": "0.1.0",
+  "description": "Scan a directory of media files and write the output to a .csv",
+  "main": "index.ts",
+  "bin": {
+    "mediascanner": "./build/index.js"
+  },
+  "scripts": {
+    "prepublish": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matt Chapman",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^14.0.26",
+    "csv-writer": "^1.6.0",
+    "ffprobe": "^1.1.0",
+    "ffprobe-static": "^3.0.0",
+    "ts-node": "^8.10.2"
+  }
+}
