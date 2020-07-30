@@ -14,11 +14,14 @@ type MediaObject = {
   codec?: string;
   width?: string;
   height?: string;
+  HD?: boolean;
   duration?: string;
   aspectRatio?: string;
 };
 
 const getFiles = async (dir: string): Promise<string[]> => {
+  console.log("Scanning dir: ", dir);
+
   const files = await fs.readdir(dir);
   return files;
 };
@@ -48,18 +51,25 @@ const getMediaObject: any = async (
       display_aspect_ratio: aspectRatio,
     } = data;
 
+    const HD = parseInt(width, 10) > 1280 ? true : false;
+
+    const convertToMinutes = (duration: string): string => {
+      if (!duration) return "Unknown";
+
+      return Math.round(parseInt(duration, 10) / 60) + "";
+    };
+
     return {
       file,
       filepath,
       codec,
       width,
       height,
-      duration,
+      HD,
+      duration: convertToMinutes(duration),
       aspectRatio,
     };
   } catch (error) {
-    console.error("Error processing file: ", file);
-
     return {
       file,
       filepath,
@@ -68,7 +78,9 @@ const getMediaObject: any = async (
 };
 
 const scanFiles = async (media: string[], dir: string): Promise<any[]> => {
-  const bar = new ProgressBar(":bar", { total: 10 });
+  const bar = new ProgressBar(":bar [:current/:total] :percent%", {
+    total: media.length,
+  });
 
   const result: MediaObject[] = [];
   for await (const m of media) {
@@ -97,22 +109,24 @@ const writeCsv = (records: MediaObject[]): void => {
   csvWriter.writeRecords(records).then(() => console.log("Done."));
 };
 
+const writeJson = (records: MediaObject[]): void => {
+  fs.writeFile("./output.json", JSON.stringify(records, null, 2), "utf8");
+};
+
 const main = async () => {
   try {
     const dir = process.argv[2] || "./";
-    const sync = process.argv[3] === "sync" ? true : false;
-
-    console.log("Scanning dir: ", dir);
 
     const files = await getFiles(dir);
     const media = filterMedia(files);
-    console.log("\nFound media:");
-    media.forEach((f) => console.log("\t", f));
+    console.log(`\tFound ${media.length || 0} media files.`);
 
-    const records = await scanFiles(media, dir, sync);
+    console.log(`Scanning files...`);
+    const records = await scanFiles(media, dir);
 
     console.log('\nWriting results to "output.csv"...');
     writeCsv(records);
+    writeJson(records);
   } catch (error) {
     console.error("Media-Scanner encountered an error:\n", error);
   }
