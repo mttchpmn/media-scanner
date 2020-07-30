@@ -14,9 +14,11 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^14.0.26",
+    "@types/progress": "^2.0.3",
     "csv-writer": "^1.6.0",
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
+    "progress": "^2.0.3",
     "ts-node": "^8.10.2"
   }
 }

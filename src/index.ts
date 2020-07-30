@@ -1,5 +1,6 @@
 #! /usr/bin/env node
 
+import ProgressBar from "progress";
 const ffprobe = require("ffprobe");
 const ffprobeStatic = require("ffprobe-static");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
@@ -67,7 +68,14 @@ const getMediaObject: any = async (
 };
 
 const scanFiles = async (media: string[], dir: string): Promise<any[]> => {
-  const result = await Promise.all(media.map((f) => getMediaObject(dir, f)));
+  const bar = new ProgressBar(":bar", { total: 10 });
+
+  const result: MediaObject[] = [];
+  for await (const m of media) {
+    bar.tick();
+    const obj = await getMediaObject(dir, m);
+    result.push(obj);
+  }
 
   return result;
 };
@@ -92,6 +100,8 @@ const writeCsv = (records: MediaObject[]): void => {
 const main = async () => {
   try {
     const dir = process.argv[2] || "./";
+    const sync = process.argv[3] === "sync" ? true : false;
+
     console.log("Scanning dir: ", dir);
 
     const files = await getFiles(dir);
@@ -99,7 +109,7 @@ const main = async () => {
     console.log("\nFound media:");
     media.forEach((f) => console.log("\t", f));
 
-    const records = await scanFiles(media, dir);
+    const records = await scanFiles(media, dir, sync);
 
     console.log('\nWriting results to "output.csv"...');
     writeCsv(records);
